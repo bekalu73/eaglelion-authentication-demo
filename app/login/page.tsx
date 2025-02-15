@@ -10,9 +10,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
+import Cookies from "js-cookie";
 
 // Comprehensive Zod Schema for PIN validation
 const LoginSchema = z.object({
+  username: z.string().optional(),
   password: z.string().min(4, "PIN must be at least 4 characters"),
 });
 
@@ -68,6 +70,7 @@ export default function Login() {
 
         // Store final login token
         localStorage.setItem("loginToken", response.data.token);
+        Cookies.set("loginToken", response.data.token, { expires: 7 });
         // Remove access token after successful login
         localStorage.removeItem("accessToken");
 

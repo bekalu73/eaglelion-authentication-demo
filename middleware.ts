@@ -1,19 +1,22 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request });
+  const loginToken = request.cookies.get("loginToken")?.value; // Read token from cookies
 
-  // Allow access to login and forgot-password pages without authentication
+  const protectedPaths = ["/dashboard"];
   const publicPaths = [
     "/login",
     "/forgot-password",
     "/validate-forgot-password",
   ];
 
-  if (!token && !publicPaths.includes(request.nextUrl.pathname)) {
+  if (!loginToken && protectedPaths.includes(request.nextUrl.pathname)) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (loginToken && publicPaths.includes(request.nextUrl.pathname)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
