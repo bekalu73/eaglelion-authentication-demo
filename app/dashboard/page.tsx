@@ -11,14 +11,14 @@ export default function Dashboard() {
   useEffect(() => {
     const loginToken = Cookies.get("loginToken");
     if (!loginToken) {
-      router.push("/login");
+      router.push("/forgot-password");
     }
   }, [router]);
 
   // Handle logout
   const handleLogout = () => {
     Cookies.remove("loginToken");
-    router.push("/login");
+    router.push("/forgot-password");
   };
 
   return (

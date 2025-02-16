@@ -2,24 +2,24 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const loginToken = request.cookies.get("loginToken")?.value; 
+  const loginToken = request.cookies.get("loginToken")?.value;
 
   // Define protected and public routes
   const protectedPaths = ["/dashboard", "reset-password"];
   const publicPaths = [
-    "/login",
     "/forgot-password",
     "/validate-forgot-password",
+    "/login",
   ];
 
   // Redirect root path to /login
   if (request.nextUrl.pathname === "/") {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/forgot-password", request.url));
   }
 
-  // If no loginToken and trying to access a protected route, redirect to /login
+  // If no loginToken and trying to access a protected route, redirect to /forgot
   if (!loginToken && protectedPaths.includes(request.nextUrl.pathname)) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/forgot-password", request.url));
   }
 
   // If loginToken exists and trying to access a public route, redirect to /dashboard

@@ -42,8 +42,8 @@ export default function ForgotPassword() {
         className="mb-4"
       />
 
-      <h2 className="text-xl font-semibold">Forgot PIN</h2>
-      <p className="text-gray-500 mb-6">Enter your username to reset PIN</p>
+      <h2 className="text-xl font-semibold">GET OTP</h2>
+      <p className="text-gray-500 mb-6">Enter your username to get OTP</p>
 
       <form onSubmit={formik.handleSubmit} className="w-full max-w-sm">
         <FormInput
@@ -72,8 +72,8 @@ export default function ForgotPassword() {
         </button>
 
         <div className="mt-4 text-right">
-          <Link href="/login" className="text-blue-900 text-sm hover:underline">
-            Back to Login
+          <Link href="#" className="text-blue-900 text-sm hover:underline">
+            forgot PIN
           </Link>
         </div>
       </form>
