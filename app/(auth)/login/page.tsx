@@ -9,15 +9,14 @@ import Cookies from "js-cookie";
 import { useAuth } from "@/hooks/useAuth";
 import { loginValidationSchema } from "@/utils/validation";
 import PasswordInput from "@/components/PasswordInput";
-import { Info } from "lucide-react"; // Import Lucide icon
+import { Info, X } from "lucide-react";
 
 export default function Login() {
   const router = useRouter();
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isTokenExpired, setIsTokenExpired] = useState(false);
   const { loginMutation } = useAuth();
-  const [showInfoPopup, setShowInfoPopup] = useState(false); // Info popup state
-
+  const [showInfoPopup, setShowInfoPopup] = useState(false);
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
@@ -81,7 +80,7 @@ export default function Login() {
             className="text-red-500 mt-3 text-sm font-semibold"
             onClick={() => setShowInfoPopup(false)}
           >
-            ✖ Close
+            <X /> Close
           </button>
         </div>
       )}
@@ -103,7 +102,7 @@ export default function Login() {
         <PasswordInput
           label="Enter PIN"
           id="password"
-          placeholder="Enter your PIN"
+          placeholder="********"
           value={formik.values.password}
           onChange={formik.handleChange}
           error={formik.errors.password}
