@@ -2,7 +2,7 @@
 
 ## 📌 Project Overview
 
-This is an authentication system built using **Next.js**, **React Query**, **Formik**, and **NextAuth.js**. It provides authentication functionalities such as login, forgot password, OTP validation, and reset password.
+This is an authentication system built using **Next.js**, **React Query**, **Formik**, and **NextAuth.js**. It provides authentication functionalities such as login, forgot password and OTP validation.
 
 ## 🚀 Tech Stack
 
