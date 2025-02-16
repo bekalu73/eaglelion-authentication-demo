@@ -77,10 +77,11 @@ export default function Login() {
           </p>
 
           <button
-            className="text-red-500 mt-3 text-sm font-semibold"
+            className="flex items-center gap-1 text-red-500 mt-3 text-sm font-semibold"
             onClick={() => setShowInfoPopup(false)}
           >
-            <X /> Close
+            <X className="w-4 h-4" />
+            Close
           </button>
         </div>
       )}
