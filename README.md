@@ -37,11 +37,11 @@ This is an authentication system built using **Next.js**, **React Query**, **For
     │   ├── not-found.tsx
     │   ├── (auth)/
     │   │   ├── layout.tsx
-    │   │   ├── forgot-password/
+    │   │   ├── otp-request/
     │   │   │   └── page.tsx
     │   │   ├── login/
     │   │   │   └── page.tsx
-    │   │   └── validate-forgot-password/
+    │   │   └── validate-otp-request/
     │   │       └── page.tsx
     │   ├── dashboard/
     │   │   └── page.tsx

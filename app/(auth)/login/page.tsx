@@ -33,7 +33,7 @@ export default function Login() {
     onSubmit: (values) => {
       setLoginError(null);
       if (isTokenExpired) {
-        router.push("/forgot-password");
+        router.push("/otp-request");
         return;
       }
       loginMutation.mutate(values, {
@@ -133,7 +133,7 @@ export default function Login() {
 
         <div className="mt-4 text-right">
           <Link
-            href="/forgot-password"
+            href="/otp-request"
             className="text-blue-900 text-sm hover:underline"
           >
             Forgot PIN?

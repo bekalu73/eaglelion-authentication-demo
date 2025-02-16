@@ -23,7 +23,7 @@ export default function ForgotPassword() {
         onSuccess: (data) => {
           console.log("here isyour OTP", data.otpcode);
           localStorage.setItem("accessToken", data.accesstoken);
-          router.push("/validate-forgot-password");
+          router.push("/validate-otp-request");
         },
         onError: (error) => {
           setOtpError(error.message || "OTP request failed. Please try again.");

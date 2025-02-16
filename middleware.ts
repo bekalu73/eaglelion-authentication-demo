@@ -6,20 +6,16 @@ export async function middleware(request: NextRequest) {
 
   // Define protected and public routes
   const protectedPaths = ["/dashboard", "reset-password"];
-  const publicPaths = [
-    "/forgot-password",
-    "/validate-forgot-password",
-    "/login",
-  ];
+  const publicPaths = ["/otp-request", "/validate-otp-request", "/login"];
 
   // Redirect root path to /login
   if (request.nextUrl.pathname === "/") {
-    return NextResponse.redirect(new URL("/forgot-password", request.url));
+    return NextResponse.redirect(new URL("/otp-request", request.url));
   }
 
   // If no loginToken and trying to access a protected route, redirect to /forgot
   if (!loginToken && protectedPaths.includes(request.nextUrl.pathname)) {
-    return NextResponse.redirect(new URL("/forgot-password", request.url));
+    return NextResponse.redirect(new URL("/otp-request", request.url));
   }
 
   // If loginToken exists and trying to access a public route, redirect to /dashboard
