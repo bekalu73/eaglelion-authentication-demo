@@ -1,110 +1,56 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useFormik } from "formik";
-import { z } from "zod";
-import { toFormikValidationSchema } from "zod-formik-adapter";
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
+import { otpValidationSchema } from "@/utils/validation";
+import OtpInput from "@/components/OtpInput";
 
-// Zod schema for OTP validation
-const OtpSchema = z.object({
-  otp: z
-    .string()
-    .length(6, "OTP must be 6 digits")
-    .regex(/^\d+$/, "OTP must contain only numbers"),
-});
-
-const OtpVerification = () => {
+export default function OtpVerification() {
   const router = useRouter();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [otpError, setOtpError] = useState<string | null>(null);
+  const { otpVerificationMutation } = useAuth();
 
-  // Second API Request Mutation (OTP Verification)
-  const verifyOtpMutation = useMutation({
-    mutationFn: async (values: { otpcode: string }) => {
-      try {
-        // Retrieve token
-        const accessToken = localStorage.getItem("accessToken");
-
-        if (!accessToken) {
-          throw new Error("Missing authentication context");
-        }
-
-        const response = await axios.post(
-          "https://sau.eaglelionsystems.com/v1.0/chatbirrapi/ldapotp/dash/confirm/dashops",
-          {
-            otpcode: values.otpcode,
-          },
-          {
-            headers: {
-              sourceapp: "ldapportal",
-              otpfor: "login",
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-
-        // Store second token
-        localStorage.setItem("secondToken", response.data.token);
-
-        return response.data;
-      } catch (error) {
-        console.error("OTP Verification Error:", error);
-
-        if (axios.isAxiosError(error)) {
-          throw new Error(
-            error.response?.data?.message ||
-              `OTP Verification failed: ${
-                error.response?.status || "Unknown error"
-              }`
-          );
-        }
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      // Navigate to Login Page
-      router.push("/login");
-    },
-    onError: (error: Error) => {
-      setOtpError(error.message);
-    },
-  });
-
-  // OTP Input Handling Methods
   const handleOtpChange = (index: number, value: string) => {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5 && inputRefs.current[index + 1]) {
-      inputRefs.current[index + 1]?.focus();
+    if (value && index < 5) {
+      document.getElementById(`otp-input-${index + 1}`)?.focus();
     }
   };
 
   const formik = useFormik({
-    initialValues: {
-      otp: otp.join(""),
-    },
-    validationSchema: toFormikValidationSchema(OtpSchema),
+    initialValues: { otp: otp.join("") },
+    validationSchema: otpValidationSchema,
     onSubmit: (values) => {
-      // Reset previous errors
       setOtpError(null);
-      // Trigger Second API Request Mutation
-      verifyOtpMutation.mutate({ otpcode: values.otp });
+      otpVerificationMutation.mutate(
+        { otpcode: values.otp },
+        {
+          onSuccess: (data) => {
+            localStorage.setItem("secondToken", data.token);
+            router.push("/login");
+          },
+          onError: (error) => {
+            setOtpError(error.message || "OTP verification failed.");
+          },
+        }
+      );
     },
   });
 
-  // Update formik values when OTP changes
-  useEffect(() => {
+  // Use useCallback to prevent function recreation on every render: PERFORMACE REASON
+  const updateOtpField = useCallback(() => {
     formik.setFieldValue("otp", otp.join(""));
   }, [otp]);
+
+  useEffect(() => {
+    updateOtpField();
+  }, [otp, updateOtpField]);
 
   return (
     <div className="flex h-screen bg-gray-100 px-20 py-10 shadow">
@@ -130,21 +76,12 @@ const OtpVerification = () => {
         </p>
 
         <form onSubmit={formik.handleSubmit} className="w-full max-w-sm">
-          <div className="flex justify-between mb-4">
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                type="text"
-                maxLength={1}
-                value={digit}
-                ref={(el) => {
-                  if (el) inputRefs.current[index] = el;
-                }}
-                onChange={(e) => handleOtpChange(index, e.target.value)}
-                className="w-10 h-12 text-center border rounded focus:border-blue-500 focus:outline-none"
-              />
-            ))}
-          </div>
+          <OtpInput
+            otp={otp}
+            handleOtpChange={handleOtpChange}
+            error={formik.errors.otp}
+            touched={formik.touched.otp}
+          />
 
           {formik.touched.otp && formik.errors.otp && (
             <p className="text-red-500 text-sm mb-4 text-center">
@@ -160,15 +97,13 @@ const OtpVerification = () => {
 
           <button
             type="submit"
-            disabled={verifyOtpMutation.isPending}
+            disabled={otpVerificationMutation.isPending}
             className="w-full bg-blue-900 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            {verifyOtpMutation.isPending ? "Verifying..." : "Verify OTP"}
+            {otpVerificationMutation.isPending ? "Verifying..." : "Verify OTP"}
           </button>
         </form>
       </div>
     </div>
   );
-};
-
-export default OtpVerification;
+}

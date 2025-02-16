@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import type { ReactNode } from "react";
-import Providers from "@/components/providers"; 
-
-
+import Providers from "@/Provider/ReactQuery/providers";
 
 export const metadata: Metadata = {
   title: "Next Auth",
@@ -15,7 +12,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers> 
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

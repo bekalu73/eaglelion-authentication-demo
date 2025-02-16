@@ -2,75 +2,33 @@
 
 import { useState } from "react";
 import { useFormik } from "formik";
-import { z } from "zod";
-import { toFormikValidationSchema } from "zod-formik-adapter";
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-
-// Zod Schema for username validation
-const ForgotPasswordSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-});
+import FormInput from "../../components/FormInput";
+import { forgotPasswordValidationSchema } from "../../utils/validation";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function ForgotPassword() {
   const router = useRouter();
   const [otpError, setOtpError] = useState<string | null>(null);
-
-  // First API Request Mutation
-  const otpRequestMutation = useMutation({
-    mutationFn: async (values: { username: string }) => {
-      try {
-        const response = await axios.post(
-          "https://sau.eaglelionsystems.com/v1.0/chatbirrapi/ldapotp/dash/request/dashops",
-          {
-            username: values.username,
-          },
-          {
-            headers: {
-              sourceapp: "ldapportal",
-              otpfor: "login",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        console.log("Full Response:", response);
-        console.log("Response Data:", response.data);
-
-        localStorage.setItem("accessToken", response.data.accesstoken);
-
-        return response.data;
-      } catch (error) {
-        console.error("First API Request Error:", error);
-
-        if (axios.isAxiosError(error)) {
-          throw new Error(
-            error.response?.data?.message ||
-              "OTP request failed. Please try again."
-          );
-        }
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      // Navigate to OTP Verification Page
-      router.push("/validate-forgot-password");
-    },
-    onError: (error: Error) => {
-      setOtpError(error.message);
-    },
-  });
+  const { otpRequestMutation } = useAuth();
 
   const formik = useFormik({
     initialValues: { username: "" },
-    validationSchema: toFormikValidationSchema(ForgotPasswordSchema),
+    validationSchema: forgotPasswordValidationSchema,
     onSubmit: (values) => {
-      // Reset previous errors
       setOtpError(null);
-      // Trigger First API Request Mutation
-      otpRequestMutation.mutate(values);
+      otpRequestMutation.mutate(values, {
+        onSuccess: (data) => {
+          console.log("here isyour OTP", data.otpcode);
+          localStorage.setItem("accessToken", data.accesstoken);
+          router.push("/validate-forgot-password");
+        },
+        onError: (error) => {
+          setOtpError(error.message || "OTP request failed. Please try again.");
+        },
+      });
     },
   });
 
@@ -96,27 +54,16 @@ export default function ForgotPassword() {
         <p className="text-gray-500 mb-6">Enter your username to reset PIN</p>
 
         <form onSubmit={formik.handleSubmit} className="w-full max-w-sm">
-          <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700 mb-2">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              {...formik.getFieldProps("username")}
-              className={`w-full p-2 border rounded ${
-                formik.touched.username && formik.errors.username
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
-              placeholder="Enter your username"
-            />
-            {formik.touched.username && formik.errors.username && (
-              <p className="text-red-500 text-sm mt-1">
-                {formik.errors.username}
-              </p>
-            )}
-          </div>
+          <FormInput
+            label="Username"
+            id="username"
+            type="text"
+            placeholder="Enter your username"
+            value={formik.values.username}
+            onChange={formik.handleChange}
+            error={formik.errors.username}
+            touched={formik.touched.username}
+          />
 
           {otpError && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-center">
